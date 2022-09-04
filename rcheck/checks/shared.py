@@ -21,10 +21,10 @@ TypeOrTuple = Union[type, Tuple[type, ...]]
 def _isinstance(val: object, _type: TypeOrTuple):
     # Boolean values are instance of ints for python backwards compatability reasons
     # This behavior is not supported in this library
-    if isinstance(val, bool):
-        if _type == int:
-            return False
-        elif isinstance(_type, tuple) and int in _type and bool not in _type:
-            return False
+    if isinstance(val, bool) and (
+        _type == int
+        or (isinstance(_type, tuple) and int in _type and bool not in _type)
+    ):
+        return False
 
     return isinstance(val, _type)

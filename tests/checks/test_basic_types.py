@@ -5,11 +5,15 @@ from rcheck import (
     InvalidRuntype,
     assert_bool,
     assert_callable,
+    assert_cond,
     assert_date,
     assert_datetime,
     assert_float,
     assert_instance,
     assert_int,
+    assert_negative,
+    assert_non_negative,
+    assert_non_positive,
     assert_number,
     assert_opt_bool,
     assert_opt_callable,
@@ -20,6 +24,7 @@ from rcheck import (
     assert_opt_int,
     assert_opt_number,
     assert_opt_str,
+    assert_positive,
     assert_str,
     is_bool,
     is_callable,
@@ -40,6 +45,16 @@ from rcheck import (
     is_opt_str,
     is_str,
 )
+
+
+class TestCond:
+    @pytest.mark.parametrize("cond,raises", [(False, True), (True, False)])
+    def test_assert_cond(self, cond, raises):
+        if raises:
+            with pytest.raises(InvalidRuntype) as e:
+                assert_cond(cond, "my_cond")
+        else:
+            assert_cond(cond, "my_cond")
 
 
 class TestBool:
@@ -346,6 +361,38 @@ class TestNumber:
                 assert_opt_number(val, name)
         else:
             assert_opt_number(val, name)
+
+    @pytest.mark.parametrize("val,valid", [(1, True), (0, False), (-10, False)])
+    def test_assert_positive(self, val, valid):
+        if not valid:
+            with pytest.raises(InvalidRuntype) as e:
+                assert_positive(val, "name")
+        else:
+            assert_positive(val, "name")
+
+    @pytest.mark.parametrize("val,valid", [(1, False), (0, False), (-5, True)])
+    def test_assert_negative(self, val, valid):
+        if not valid:
+            with pytest.raises(InvalidRuntype) as e:
+                assert_negative(val, "name")
+        else:
+            assert_negative(val, "name")
+
+    @pytest.mark.parametrize("val,valid", [(1, False), (0, True), (-10, True)])
+    def test_assert_non_positive(self, val, valid):
+        if not valid:
+            with pytest.raises(InvalidRuntype) as e:
+                assert_non_positive(val, "name")
+        else:
+            assert_non_positive(val, "name")
+
+    @pytest.mark.parametrize("val,valid", [(1, True), (0, True), (-20, False)])
+    def test_assert_non_negative(self, val, valid):
+        if not valid:
+            with pytest.raises(InvalidRuntype) as e:
+                assert_non_negative(val, "name")
+        else:
+            assert_non_negative(val, "name")
 
 
 class TestClass:

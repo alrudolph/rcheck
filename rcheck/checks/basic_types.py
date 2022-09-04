@@ -1,7 +1,25 @@
 from datetime import date, datetime
 from typing import Optional, Union
 
-from rcheck.checks.shared import _assert_simple_type_fail_message, _isinstance
+from rcheck.checks.shared import (
+    InvalidRuntype,
+    _assert_simple_type_fail_message,
+    _isinstance,
+)
+
+#
+# General condition
+#
+
+
+def _assert_true_fail_message(name: str, message: Optional[str] = None):
+    return InvalidRuntype(f"Conditions not met for {name}." + (f"\n\n{message}" or ""))
+
+
+def assert_cond(condition: bool, name: str, message: Optional[str] = None):
+    if not condition:
+        raise _assert_true_fail_message(name, message)
+
 
 #
 # bool
@@ -118,6 +136,49 @@ def is_opt_number(val: object):
 def assert_opt_number(val: object, name: str, message: Optional[str] = None):
     if not is_opt_number(val):
         raise _assert_simple_type_fail_message("Optional[Number]", val, name, message)
+
+
+Number = Union[int, float]
+
+
+def assert_positive(number: Number, name: str, message: Optional[str] = None):
+    if number <= 0:
+        _message = message
+
+        if message is not None:
+            _message = f"Expected variable {name} to be positive. Got {number}."
+
+        raise _assert_true_fail_message(name, _message)
+
+
+def assert_negative(number: Number, name: str, message: Optional[str] = None):
+    if number >= 0:
+        _message = message
+
+        if message is not None:
+            _message = f"Expected variable {name} to be negative. Got {number}."
+
+        raise _assert_true_fail_message(name, _message)
+
+
+def assert_non_positive(number: Number, name: str, message: Optional[str] = None):
+    if number > 0:
+        _message = message
+
+        if message is not None:
+            _message = f"Expected variable {name} to be non-positive. Got {number}."
+
+        raise _assert_true_fail_message(name, _message)
+
+
+def assert_non_negative(number: Number, name: str, message: Optional[str] = None):
+    if number < 0:
+        _message = message
+
+        if message is not None:
+            _message = f"Expected variable {name} to be non-negative. Got {number}."
+
+        raise _assert_true_fail_message(name, _message)
 
 
 #

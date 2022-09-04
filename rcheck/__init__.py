@@ -1,4 +1,4 @@
-from rcheck.checks import *
+from .checks import *
 
 # from .decorator import check
 # from .definitions import *

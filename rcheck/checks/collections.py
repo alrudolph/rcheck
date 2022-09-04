@@ -17,8 +17,8 @@ def _assert_list_type_fail_message(
 ):
     return InvalidRuntype(
         f"Expected list items of {name} to be type {expected_type_str}. "
-        + f"Got value {val!r} of type {type(val).__name__} at index {failure_index}. "
-        + (message or "")
+        + f"Got value {val!r} of type {type(val).__name__} at index {failure_index}."
+        + (f"\n\n{message}" or "")
     )
 
 
