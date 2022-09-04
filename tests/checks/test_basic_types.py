@@ -362,37 +362,69 @@ class TestNumber:
         else:
             assert_opt_number(val, name)
 
-    @pytest.mark.parametrize("val,valid", [(1, True), (0, False), (-10, False)])
-    def test_assert_positive(self, val, valid):
+    @pytest.mark.parametrize(
+        "val,valid,msg",
+        [
+            (1, True, None),
+            (0, False, None),
+            (-10, False, None),
+            (-10, False, "other msg"),
+        ],
+    )
+    def test_assert_positive(self, val, valid, msg):
         if not valid:
             with pytest.raises(InvalidRuntype) as e:
-                assert_positive(val, "name")
+                assert_positive(val, "name", msg)
         else:
-            assert_positive(val, "name")
+            assert_positive(val, "name", msg)
 
-    @pytest.mark.parametrize("val,valid", [(1, False), (0, False), (-5, True)])
-    def test_assert_negative(self, val, valid):
+    @pytest.mark.parametrize(
+        "val,valid,msg",
+        [
+            (1, False, None),
+            (0, False, None),
+            (-5, True, None),
+            (10, False, "other msg"),
+        ],
+    )
+    def test_assert_negative(self, val, valid, msg):
         if not valid:
             with pytest.raises(InvalidRuntype) as e:
-                assert_negative(val, "name")
+                assert_negative(val, "name", msg)
         else:
-            assert_negative(val, "name")
+            assert_negative(val, "name", msg)
 
-    @pytest.mark.parametrize("val,valid", [(1, False), (0, True), (-10, True)])
-    def test_assert_non_positive(self, val, valid):
+    @pytest.mark.parametrize(
+        "val,valid,msg",
+        [
+            (1, False, None),
+            (0, True, None),
+            (-10, True, None),
+            (100, False, "Other msg"),
+        ],
+    )
+    def test_assert_non_positive(self, val, valid, msg):
         if not valid:
             with pytest.raises(InvalidRuntype) as e:
-                assert_non_positive(val, "name")
+                assert_non_positive(val, "name", msg)
         else:
-            assert_non_positive(val, "name")
+            assert_non_positive(val, "name", msg)
 
-    @pytest.mark.parametrize("val,valid", [(1, True), (0, True), (-20, False)])
-    def test_assert_non_negative(self, val, valid):
+    @pytest.mark.parametrize(
+        "val,valid,msg",
+        [
+            (1, True, None),
+            (0, True, None),
+            (-20, False, None),
+            (-1, False, "other msg"),
+        ],
+    )
+    def test_assert_non_negative(self, val, valid, msg):
         if not valid:
             with pytest.raises(InvalidRuntype) as e:
-                assert_non_negative(val, "name")
+                assert_non_negative(val, "name", msg)
         else:
-            assert_non_negative(val, "name")
+            assert_non_negative(val, "name", msg)
 
 
 class TestClass:

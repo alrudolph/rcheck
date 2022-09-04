@@ -5,7 +5,7 @@ on:
     types: [ created ]
 
 jobs:
-  upload:
+  Publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +19,7 @@ jobs:
           python-version: 3.8
 
       - name: Installs dependencies
-        run: poetry install
+        run: poetry install --no-dev
 
       - name: Publish package
         run: |

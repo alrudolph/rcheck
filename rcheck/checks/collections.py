@@ -81,9 +81,6 @@ def assert_list_of_opt(
     if not _isinstance(val, list):
         raise _assert_simple_type_fail_message("list", val, name, message)
 
-    if of_optional is None:
-        return
-
     items_pass_check, failed_idx = _is_iterable_of_opt(val, of_optional)
     if not items_pass_check:
         raise _assert_list_type_fail_message(

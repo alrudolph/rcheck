@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  upload:
+  Test:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,7 +20,7 @@ jobs:
           cache: poetry
 
       - name: Installs dependencies
-        run: poetry install
+        run: poetry install --no-dev
 
       - name: Run tests
         run: |
