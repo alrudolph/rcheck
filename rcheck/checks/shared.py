@@ -28,3 +28,10 @@ def _isinstance(val: object, _type: TypeOrTuple):
         return False
 
     return isinstance(val, _type)
+
+def type_name(of: object):
+    # Ehhhh
+    try:
+        return of.__name__.replace("typing.", "")
+    except:
+        return str(of).replace("typing.", "")

@@ -5,6 +5,7 @@ from rcheck.checks.shared import (
     InvalidRuntype,
     _assert_simple_type_fail_message,
     _isinstance,
+    type_name,
 )
 
 #
@@ -13,7 +14,7 @@ from rcheck.checks.shared import (
 
 
 def _assert_true_fail_message(name: str, message: Optional[str] = None):
-    return InvalidRuntype(f"Conditions not met for {name}." + (f"\n\n{message}" or ""))
+    return InvalidRuntype(f"Conditions not met for {name}." + (f"\n\n{message}" if message is not None else ""))
 
 
 def assert_cond(condition: bool, name: str, message: Optional[str] = None):
@@ -138,9 +139,6 @@ def assert_opt_number(val: object, name: str, message: Optional[str] = None):
         raise _assert_simple_type_fail_message("Optional[Number]", val, name, message)
 
 
-Number = Union[int, float]
-
-
 def assert_positive(number: Number, name: str, message: Optional[str] = None):
     if number <= 0:
         _message = message
@@ -186,26 +184,24 @@ def assert_non_negative(number: Number, name: str, message: Optional[str] = None
 #
 
 
-def is_instance(val: object, cls: object):
-    return _isinstance(val, cls)
+def is_instance(val: object, of: object):
+    return _isinstance(val, of)
 
 
-def assert_instance(val: object, cls: object, name: str, message: Optional[str] = None):
-    if not is_instance(val, cls):
-        raise _assert_simple_type_fail_message(cls.__name__, val, name, message)
+def assert_instance(val: object, of: object, name: str, message: Optional[str] = None):
+    if not is_instance(val, of):
+        raise _assert_simple_type_fail_message(type_name(of), val, name, message)
 
 
-def is_opt_instance(val: object, cls: object):
-    return val is None or is_instance(val, cls)
+def is_opt_instance(val: object, of: object):
+    return val is None or is_instance(val, of)
 
 
 def assert_opt_instance(
-    val: object, cls: object, name: str, message: Optional[str] = None
+    val: object, of: object, name: str, message: Optional[str] = None
 ):
-    if not is_opt_instance(val, cls):
-        raise _assert_simple_type_fail_message(
-            f"Optional[{cls.__name__}]", val, name, message
-        )
+    if not is_opt_instance(val, of):
+        raise _assert_simple_type_fail_message(type_name(of), val, name, message)
 
 
 #

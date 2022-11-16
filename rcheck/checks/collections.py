@@ -1,12 +1,34 @@
 from typing import Optional
 
 from rcheck.checks.basic_types import _assert_simple_type_fail_message
-from rcheck.checks.shared import InvalidRuntype, _isinstance
+from rcheck.checks.shared import InvalidRuntype, _isinstance, type_name
+
 
 #
 # list
 #
+def _print_list_index(val, index):
+    val_repr = repr(val)
 
+    if len(val_repr) > 100:
+        start_idx = index - 1 if index > 0 else 0
+        end = index + 2
+        
+        print_repr = repr(val[start_idx:end])[1:-1]
+        print_repr = f"[ ..., {print_repr}, ... ]"
+
+        pre_spaces = " " * 6
+
+    else:
+        start_idx = 0
+        print_repr = val_repr
+        pre_spaces = ""
+
+    spaces = pre_spaces + " " * (len(repr(val[start_idx:(index + 1)])) - 2)    
+    cursor = spaces + "↑"   
+    cursor += "\n" + spaces + f"| got type {type_name(type(val[index]))} at index {index}"
+
+    return print_repr + "\n" + cursor
 
 def _assert_list_type_fail_message(
     expected_type_str: str,
@@ -14,11 +36,12 @@ def _assert_list_type_fail_message(
     name: str,
     failure_index: int,
     message: Optional[str] = None,
+    list_name = "list"
 ):
     return InvalidRuntype(
-        f"Expected list items of {name} to be type {expected_type_str}. "
-        + f"Got value {val!r} of type {type(val).__name__} at index {failure_index}."
-        + (f"\n\n{message}" or "")
+        f"Expected items of the {list_name} {name} to be of type {expected_type_str}. \n\n"
+        + _print_list_index(val, failure_index)
+        + (f"\n\n{message}" if message is not None else "")
     )
 
 
@@ -53,7 +76,7 @@ def assert_list(
     items_pass_check, failed_idx = _is_iterable_of(val, of)
     if not items_pass_check:
         raise _assert_list_type_fail_message(
-            of.__name__, val[failed_idx], name, failed_idx, message
+            type_name(of), val, name, failed_idx, message
         )
 
 
@@ -65,26 +88,26 @@ def _is_iterable_of_opt(iterable, sub_type):
     return True, -1
 
 
-def is_list_of_opt(val: object, of_optional: type):
+def is_list_of_opt(val: object, of: type):
     if not _isinstance(val, list):
         return False
 
-    return _is_iterable_of_opt(val, of_optional)[0]
+    return _is_iterable_of_opt(val, of)[0]
 
 
 def assert_list_of_opt(
     val: object,
-    of_optional: type,
+    of: type,
     name: str,
     message: Optional[str] = None,
 ):
     if not _isinstance(val, list):
         raise _assert_simple_type_fail_message("list", val, name, message)
 
-    items_pass_check, failed_idx = _is_iterable_of_opt(val, of_optional)
+    items_pass_check, failed_idx = _is_iterable_of_opt(val, of)
     if not items_pass_check:
         raise _assert_list_type_fail_message(
-            of_optional.__name__, val[failed_idx], name, failed_idx, message
+            type_name(of), val, name, failed_idx, message
         )
 
 
@@ -111,7 +134,7 @@ def assert_opt_list(
     items_pass_check, failed_idx = _is_iterable_of(val, of)
     if not items_pass_check:
         raise _assert_list_type_fail_message(
-            of.__name__, val[failed_idx], name, failed_idx, message
+            type_name(of), val, name, failed_idx, message, list_name="optional list"
         )
 
 
