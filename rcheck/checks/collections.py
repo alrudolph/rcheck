@@ -2,7 +2,7 @@ from typing import Optional
 
 from rcheck.checks.basic_types import _assert_simple_type_fail_message
 from rcheck.checks.shared import InvalidRuntype, _isinstance, type_name
-
+from collections.abc import Sequence
 
 #
 # list
@@ -141,3 +141,66 @@ def assert_opt_list(
 #
 # dict
 #
+
+def _assert_dict_type_fail_message(
+    expected_type_str: str,
+    val: object,
+    name: str,
+    failure_index: int,
+    message: Optional[str] = None,
+    dict_name = "dict"
+):
+    return InvalidRuntype(
+        f"Expected items of the {list_name} {name} to be of type {expected_type_str}. \n\n"
+        # + _print_list_index(val, failure_index)
+        + (f"\n\n{message}" if message is not None else "")
+    )
+
+
+def assert_dict(
+    val: object,
+    name: str,
+    message: Optional[str] = None,
+    *,
+    key_of: Optional[type] = None,
+    val_of: Optional[type] = None,
+):
+    if not _isinstance(val, dict):
+        raise _assert_simple_type_fail_message("dict", val, name, message)
+
+    if key_of is not None:
+        items_pass_check, failed_idx = _is_iterable_of(val.keys(), key_of)
+        if not items_pass_check:
+            raise _assert_list_type_fail_message(
+                type_name(key_of), val, name, failed_idx, message
+            )
+
+    if val_of is not None:
+        items_pass_check, failed_idx = _is_iterable_of(val.values(), val_of)
+        if not items_pass_check:
+            raise _assert_list_type_fail_message(
+                type_name(val_of), val, name, failed_idx, message
+            )
+
+#
+# sequences
+#
+def assert_sequence(
+    val: object,
+    name: str,
+    message: Optional[str] = None,
+    *,
+    of: Optional[type] = None,
+):
+    if not _isinstance(val, Sequence):
+        raise _assert_simple_type_fail_message("Sequence", val, name, message)
+
+    if of is None:
+        return
+
+    items_pass_check, failed_idx = _is_iterable_of(val, of)
+    if not items_pass_check:
+        raise _assert_list_type_fail_message(
+            type_name(of), val, name, failed_idx, message
+        )
+        
