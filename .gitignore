@@ -10,3 +10,6 @@ poetry.lock
 .vscode
 
 dist
+
+.ruff_cache
+.mypy_cache

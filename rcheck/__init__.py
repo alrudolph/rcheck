@@ -1,4 +1,3 @@
-from .checks import *
+from rcheck.check import Check, CheckAll
 
-# from .decorator import check
-# from .definitions import *
+r = Check(suppress_and_record=False)
