@@ -34,6 +34,8 @@ VT = TypeVar("VT")
 
 
 class BaseException(Exception):
+    type_: Type[Any]
+    
     def __init__(
         self,
         name: str,
@@ -45,71 +47,72 @@ class BaseException(Exception):
         self._description = description
 
     def __str__(self):
-        return f"""
-        {self._name}
-        {self._value}
-        {self._description}
-    """
+        output = f"Error in param: {self._name} got value {self._value} is not of type {self.type_.__name__}."
+
+        if self._description is not None:
+            output += "\n\n" + self._description
+
+        return output
 
 
 class StrException(BaseException):
-    ...
+    type_ = str
 
 
 class BytesException(BaseException):
-    ...
+    type_ = bytes
 
 
 class BoolException(BaseException):
-    ...
+    type_ = bool
 
 
 class FloatException(BaseException):
-    ...
+    type_ = float
 
 
 class IntException(BaseException):
-    ...
+    type_ = int
 
 
 class SequenceException(BaseException):
-    ...
+    type_ = Sequence
 
 
 class MutableSequenceException(BaseException):
-    ...
+    type_ = MutableSequence
 
 
 class SetException(BaseException):
-    ...
+    type_ = Set
 
 
 class MutableSetException(BaseException):
-    ...
+    type_ = MutableSet
 
 
 class MappingException(BaseException):
-    ...
+    type_ = Mapping
 
 
 class MutableMappingException(BaseException):
-    ...
+    type_ = MutableMapping
 
 
 class SequenceOfException(BaseException):
-    ...
+    type_ = Sequence
 
 
 class SetOfException(BaseException):
-    ...
+    type_ = Set
 
 
 class MutableSequenceOfException(BaseException):
-    ...
+    type_ = MutableSequence
 
 
 class MutableSetOfException(BaseException):
-    ...
+    type_ = MutableSet
 
 
 def is_optional(type_: Type[Any]):
@@ -1004,13 +1007,14 @@ class Check:
 
 # r = Check(suppress_and_record=False)
 
-# seq = r.check_opt_sequence("my seq", [])
+# # seq = r.check_opt_sequence("my seq", [])
 
-# my_sq = r.check_sequence("my seq", [None, [1, "hello",]], of=Optional[Sequence[Union[int, str]]])
-# print(my_sq)
+# # my_sq = r.check_sequence("my seq", [None, [1, "hello",]], of=Optional[Sequence[Union[int, str]]])
+# # print(my_sq)
 
 # with r.check_all:
-#     a = r.check_str("str_a", "a", description="My first string")
-#     b = r.check_str("str_b", "b", description="My second string")
+#     a = r.check_str("str_a", 1.2, description="My first string")
+#     b = r.check_int("str_b", "b", description="My second string")
+#     c = r.check_sequence("my sq", 1)
 
 # print(a, b)
