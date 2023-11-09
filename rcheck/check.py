@@ -21,16 +21,18 @@ from typing import (
     get_args,
     get_origin,
     overload,
+    ParamSpec,
 )
+from types import TracebackType
 
 # references:
 # * https://github.com/dagster-io/dagster/blob/498e3f1da1fa3ed6c548bff26e74c6c3e05fd140/python_modules/dagster/dagster/_check/__init__.py
 # * https://github.com/pydantic/pydantic/blob/6ed90daab74767ce94ee4d2413f02f42b73a53f6/pydantic/v1/validators.py
 
-
 T = TypeVar("T")
 KT = TypeVar("KT")
 VT = TypeVar("VT")
+P = ParamSpec("P")
 
 
 class BaseException(Exception):
@@ -46,6 +48,18 @@ class BaseException(Exception):
         self._value = value
         self._description = description
 
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def value(self) -> str:
+        return self._value
+
+    @property
+    def description(self) -> Optional[str]:
+        return self._description
+    
     def __str__(self):
         output = f"Error in param: {self._name} got value {self._value} is not of type {self.type_.__name__}."
 
@@ -54,14 +68,11 @@ class BaseException(Exception):
 
         return output
 
-
 class StrException(BaseException):
     type_ = str
 
-
 class BytesException(BaseException):
     type_ = bytes
-
 
 class BoolException(BaseException):
     type_ = bool
@@ -142,19 +153,24 @@ class CheckAll:
     def __init__(self, *, check_instance: Check):
         self.check = check_instance
 
-    def __enter__(self):
+    def __enter__(self) -> Check:
         return self.check
 
-    def __exit__(self, exc_type, exc_value, exc_tb):
+    def __exit__(
+        self, 
+        exc_type: Optional[Type[Exception]], 
+        exc_value: Optional[Exception], 
+        exc_tb: Optional[TracebackType]
+    ) -> bool:
         # non rcheck errors
         if exc_type is not None:
             return True
 
-        records = self.check._records
+        records = self.check._records  # type: ignore
 
         if len(records) == 0:
-            if self.check._suppress_and_record_original:
-                r._disable_suppress_and_record()
+            if self.check._suppress_and_record_original:  # type: ignore
+                self.check._disable_suppress_and_record()  # type: ignore
 
             return False
 
@@ -200,10 +216,11 @@ class Check:
         del self._records
         self._suppress_and_record = False
 
-    def _error(self, exception: Exception):
+    def _error(self, exception: BaseException) -> Any:
         if self._suppress_and_record:
             self._records.append(exception)
-            return
+            # want to return in case of check_all context
+            return exception
 
         raise exception
 
@@ -295,8 +312,7 @@ class Check:
         if isinstance(value, str):
             return value
 
-        self._error(StrException(name, value, description))
-        return "rcheck placeholder for check_all contextes. this check resulted in an error and was used before the end of the check_all context. refrain from doing this."
+        return self._error(StrException(name, value, description))
 
     @overload
     def check_opt_str(
@@ -329,7 +345,7 @@ class Check:
     ) -> Optional[str]:
         if value is None:
             return default
-
+        
         return self.check_str(name, value, description=description)
 
     def check_bytes(
@@ -345,8 +361,7 @@ class Check:
         if isinstance(value, bytearray):
             return bytes(value)
 
-        self._error(BytesException(name, value, description))
-        return bytes()
+        return self._error(BytesException(name, value, description))
 
     @overload
     def check_opt_bytes(
@@ -392,8 +407,7 @@ class Check:
         if isinstance(value, bool):
             return value
 
-        self._error(BoolException(name, value, description))
-        return False
+        return self._error(BoolException(name, value, description))
 
     @overload
     def check_opt_bool(
@@ -439,8 +453,7 @@ class Check:
         if isinstance(value, int):
             return value
 
-        self._error(IntException(name, value, description))
-        return -1
+        return self._error(IntException(name, value, description))
 
     @overload
     def check_opt_int(
@@ -486,8 +499,7 @@ class Check:
         if isinstance(value, float):
             return value
 
-        self._error(FloatException(name, value, description))
-        return -1.0
+        return self._error(FloatException(name, value, description))
 
     @overload
     def check_opt_float(
@@ -547,11 +559,11 @@ class Check:
                     continue
 
                 # todo: pass in element value, type
-                self._error(SequenceOfException(name, value, description))
+                return self._error(SequenceOfException(name, value, description))
 
             is_instance_of, instance_of_desc = self._generic_isinstance(element, of)
             if not is_instance_of:
-                self._error(SequenceOfException(name, value, description))
+                return self._error(SequenceOfException(name, value, description))
 
         return value
 
@@ -587,14 +599,14 @@ class Check:
         value: Any,
         *,
         of: Type[T] = Any,
-        default_sequence: Callable[[], Optional[Sequence[T]]] = lambda: [],
+        default_sequence: Callable[[], Optional[Sequence[T]]] = lambda: cast(Sequence[T], []),
         custom_of_checker: Optional[Callable[[Any], bool]] = None,
         description: Optional[str] = None,
     ) -> Optional[Sequence[T]]:
         if value is None:
             return default_sequence()
 
-        self.check_sequence(
+        value = self.check_sequence(
             name,
             value,
             of=of,
@@ -629,11 +641,11 @@ class Check:
                     continue
 
                 # todo: pass in element value, type
-                self._error(MutableSequenceOfException(name, value, description))
+                return self._error(MutableSequenceOfException(name, value, description))
 
             is_instance_of, instance_of_desc = self._generic_isinstance(element, of)
             if not is_instance_of:
-                self._error(MutableSequenceOfException(name, value, description))
+                return self._error(MutableSequenceOfException(name, value, description))
 
             if element is None and default_element is not None:
                 value[i] = default_element()
@@ -686,7 +698,7 @@ class Check:
         if value is None:
             return default_mutable_sequence()
 
-        self.check_mutable_sequence(
+        value = self.check_mutable_sequence(
             name,
             value,
             of=of,
@@ -721,11 +733,11 @@ class Check:
                     continue
 
                 # todo: pass in element value, type
-                self._error(SetOfException(name, value, description))
+                return self._error(SetOfException(name, value, description))
 
             is_instance_of, instance_of_desc = self._generic_isinstance(element, of)
             if not is_instance_of:
-                self._error(SetOfException(name, value, description))
+                return self._error(SetOfException(name, value, description))
 
         return value
 
@@ -768,7 +780,7 @@ class Check:
         if value is None:
             return default_set()
 
-        self.check_set(
+        value = self.check_set(
             name,
             value,
             of=of,
@@ -791,14 +803,14 @@ class Check:
             self._error(MutableSetException(name, value, description))
             return set()
 
-        self.check_set(
+        value = self.check_set(
             name,
             value,
             of=of,
             custom_of_checker=custom_of_checker,
             description=description,
         )
-
+    
         return value
 
     @overload
@@ -840,7 +852,7 @@ class Check:
         if value is None:
             return default_mutable_set()
 
-        self.check_mutable_set(
+        value = self.check_mutable_set(
             name,
             value,
             of=of,
@@ -864,10 +876,12 @@ class Check:
             return {}
 
         if keys_of is not Any:
-            self.check_sequence(f"keys of {name}", list(value.keys()), of=keys_of)
+            # TODO - if this returns error
+            self.check_sequence(f"keys of {name}", list(cast(Sequence[KT], value.keys())), of=keys_of)
 
         if values_of is not Any:
-            self.check_sequence(f"values of {name}", list(value.values()), of=values_of)
+            # TODO - if this returns error
+            self.check_sequence(f"values of {name}", list(cast(Sequence[VT], value.values())), of=values_of)
 
         return cast(Mapping[KT, VT], value)
 
@@ -910,7 +924,7 @@ class Check:
         if value is None:
             return default_mapping()
 
-        self.check_mapping(
+        value = self.check_mapping(
             name,
             value,
             keys_of=keys_of,
@@ -933,7 +947,7 @@ class Check:
             self._error(MutableMappingException(name, value, description))
             return {}
 
-        self.check_mapping(
+        value = self.check_mapping(
             name,
             value,
             keys_of=keys_of,
@@ -988,7 +1002,7 @@ class Check:
         if value is None:
             return default_mutable_mapping()
 
-        self.check_opt_mapping(
+        value = self.check_opt_mapping(
             name,
             value,
             keys_of=keys_of,
