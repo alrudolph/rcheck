@@ -24,6 +24,8 @@ from typing import (
     overload,
 )
 
+AnyType = Type[Any] | Tuple[Type[Any], ...]
+
 T = TypeVar("T")
 KT = TypeVar("KT")
 VT = TypeVar("VT")
@@ -209,7 +211,7 @@ def check_all():
     return CheckAll(check_instance=Check(suppress_and_record=True))
 
 
-def _convert_tuple_to_union(type_: Type[Any]) -> Type[Any]:
+def _convert_tuple_to_union(type_: AnyType) -> Type[Any]:
     if isinstance(type_, tuple):
         tmp_type_ = Union[int, float]  # could be anything
         setattr(tmp_type_, "__args__", type_)
@@ -287,7 +289,7 @@ class Check:
 
         raise exception
 
-    def _generic_isinstance(self, value: Any, type_: Type[Any]) -> Tuple[bool, Any]:
+    def _generic_isinstance(self, value: Any, type_: AnyType) -> Tuple[bool, Any]:
         # print("generic isinstaance", value, type_)
         # print(value, type_)
         type_ = _convert_tuple_to_union(type_)
@@ -1121,28 +1123,28 @@ class Check:
         Examples
         --------
         Successful check
-        >>> value = r.check_sequence("my sequence", [])
+        >>> value = r.check_opt_sequence("my sequence", [])
         >>> value
         []
 
         Successful check
         >>> value = None
-        >>> value = r.check_sequence("my sequence", None)
+        >>> value = r.check_opt_sequence("my sequence", None)
         >>> value
         []
 
         Successful check
         >>> from typing import Optional
-        >>> value = r.check_sequence("my sequence", [None, 1], of=Optional[int])
+        >>> value = r.check_opt_sequence("my sequence", [None, 1], of=Optional[int])
         >>> value
         [None, 1]
 
         Unsuccessful check
-        >>> value = r.check_sequence("my sequence?", {})
+        >>> value = r.check_opt_sequence("my sequence?", {})
         SequenceException: Error in param: name got value {} is not of type Sequence.
 
         Unsuccessful check
-        >>> value = r.check_sequence("my sequence of strings?", [2.0], of=str)
+        >>> value = r.check_opt_sequence("my sequence of strings?", [2.0], of=str)
         SequenceOfException: Error in param: name got value [2.0] is not of type str.
         """
         if value is None:
@@ -1178,7 +1180,7 @@ class Check:
         name: str,
         value: Any,
         *,
-        default_element: Optional[Callable[[], Any]],
+        default_element: Callable[[], Any],
         custom_of_checker: Optional[Callable[[Any], bool]] = None,
         description: Optional[str] = None,
     ) -> MutableSequence[Any]:
@@ -1263,9 +1265,9 @@ class Check:
         name: str,
         value: Any,
         of: Type[T],
-        default_element: Optional[Callable[[], T]],
-        custom_of_checker: Optional[Callable[[Any], bool]],
-        description: Optional[str],
+        default_element: Callable[[], T] | None,
+        custom_of_checker: Callable[[Any], bool] | None,
+        description: str | None,
         type_: Type[Sequence[T]],
         exception: Type[BaseException],
         exception_of: Type[BaseException]
@@ -1773,7 +1775,7 @@ class Check:
         name: str,
         value: Any,
         *,
-        keys_of: Type[KT] = Type[Any],
+        keys_of: Type[KT] = Any,
         values_of: Type[VT] = Any,
         description: Optional[str] = None,
     ) -> Mapping[KT, VT]:
@@ -1884,7 +1886,7 @@ class Check:
             Name of the variable
         value : Any
             Value to test being a Mapping
-        default_mapping : Callable[[], Optional[Mapping[KT, VT]]]
+        default_mapping : Callable[[], Mapping[KT, VT] | None]
             Default value to use in case the mapping is None
         keys_of : Type[KT]
             Type of the keys of the mapping to check
