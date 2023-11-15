@@ -9,7 +9,6 @@ from collections.abc import (
     Sequence,
     Set,
 )
-from types import TracebackType
 from typing import (
     Any,
     List,
@@ -30,194 +29,30 @@ T = TypeVar("T")
 KT = TypeVar("KT")
 VT = TypeVar("VT")
 
-class BaseException(Exception):
-    type_: Type[Any]
-
-    def __init__(
-        self,
-        name: str,
-        value: Any,
-        description: Optional[str] = None,
-    ):
-        self._name = name
-        self._value = value
-        self._description = description
-
-    def __str__(self):
-        output = f"Error in param: {self._name} got value {self._value} is not of type {self.type_.__name__}."
-
-        if self._description is not None:
-            output += "\n\n" + self._description
-
-        return output
-
-
-class StrException(BaseException):
-    type_ = str
-
-
-class BytesException(BaseException):
-    type_ = bytes
-
-
-class BoolException(BaseException):
-    type_ = bool
-
-
-class FloatException(BaseException):
-    type_ = float
-
-
-class IntException(BaseException):
-    type_ = int
-
-
-class OptStrException(BaseException):
-    type_ = str
-    is_optional = True
-
-
-class OptBytesException(BaseException):
-    type_ = bytes
-    is_optional = True
-
-
-class OptBoolException(BaseException):
-    type_ = bool
-    is_optional = True
-
-
-class OptFloatException(BaseException):
-    type_ = float
-    is_optional = True
-
-
-class OptIntException(BaseException):
-    type_ = int
-    is_optional = True
-
-
-class SequenceException(BaseException):
-    type_ = Sequence
-
-
-class MutableSequenceException(BaseException):
-    type_ = MutableSequence
-
-
-class SetException(BaseException):
-    type_ = Set
-
-
-class MutableSetException(BaseException):
-    type_ = MutableSet
-
-
-class MappingException(BaseException):
-    type_ = Mapping
-
-
-class MutableMappingException(BaseException):
-    type_ = MutableMapping
-
-
-# TODO: Need to impl the X`of`Exception's
-
-class SequenceOfException(BaseException):
-    type_ = Sequence
-
-
-class SetOfException(BaseException):
-    type_ = Set
-
-
-class MutableSequenceOfException(BaseException):
-    type_ = MutableSequence
-
-
-class MutableSetOfException(BaseException):
-    type_ = MutableSet
-
-
-def is_optional(type_: Type[Any]):
-    return type(None) in get_args(type_)
-
-
-def remove_optional(type_: Type[Any]):
-    if get_origin(type_) != Union:
-        return type_
-
-    if not is_optional(type_):
-        return type_
-
-    args = get_args(type_)
-
-    if len(args) == 2:
-        none_index = args.index(type(None))
-        return args[1 - none_index]
-
-    # deep copy
-    return_type = Union[int, None]  # could be anything
-    return_type.__dict__ = type_.__dict__.copy()
-
-    setattr(return_type, "__args__", tuple(arg for arg in args if arg != type(None)))
-
-    return return_type
-
-
-class CheckAll:
-    def __init__(self, *, check_instance: Check):
-        self.check = check_instance
-
-    def __enter__(self) -> Check:
-        self.check._enable_suppress_and_record() # type: ignore
-        return self.check
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[Exception]],
-        exc_value: Optional[Exception],
-        exc_tb: Optional[TracebackType],
-    ):
-        # needs to come before this value is deleted
-        records = self.check._records  # type: ignore
-        
-        if not self.check._suppress_and_record_original:  # type: ignore
-            self.check._disable_suppress_and_record()  # type: ignore
-
-        # non rcheck errors
-        if exc_type is not None:
-            return
-
-        if len(records) == 0:
-            return
-
-        if len(records) == 1:
-            raise records[0]
-
-        raise ExceptionGroup("Multiple rcheck validation errors occured", records)
-
-
-def check_all():
-    """
-    Usage (need to replace all `r.check_*` with `checker.check_*` or whatever variable name you decide):
-    ```
-    from rcheck import check_all
-
-    with check_all() as checker:
-        checker.check_str("str name", possible_str)
-    ```
-    """
-    return CheckAll(check_instance=Check(suppress_and_record=True))
-
-
-def _convert_tuple_to_union(type_: AnyType) -> Type[Any]:
-    if isinstance(type_, tuple):
-        tmp_type_ = Union[int, float]  # could be anything
-        setattr(tmp_type_, "__args__", type_)
-        type_ = tmp_type_
-
-    return type_
+from rcheck.exceptions import (
+    BaseException,
+    BoolException,
+    BytesException,
+    FloatException,
+    IntException,
+    MappingException,
+    MutableMappingException,
+    MutableSequenceException,
+    MutableSequenceOfException,
+    MutableSetException,
+    MutableSetOfException,
+    OptBoolException,
+    OptBytesException,
+    OptFloatException,
+    OptIntException,
+    OptStrException,
+    SequenceException,
+    SequenceOfException,
+    SetException,
+    SetOfException,
+    StrException,
+)
+from rcheck.type_utils import convert_tuple_to_union, is_optional, remove_optional
 
 
 class Check:
@@ -258,15 +93,15 @@ class Check:
     []
 
     """
-    
+
     @overload
     def __init__(self) -> None:
         ...
-    
+
     @overload
     def __init__(self, *, suppress_and_record: bool) -> None:
         ...
-        
+
     def __init__(self, *, suppress_and_record: bool = False) -> None:
         self._suppress_and_record = suppress_and_record
         self._suppress_and_record_original = suppress_and_record
@@ -292,7 +127,7 @@ class Check:
     def _generic_isinstance(self, value: Any, type_: AnyType) -> Tuple[bool, Any]:
         # print("generic isinstaance", value, type_)
         # print(value, type_)
-        type_ = _convert_tuple_to_union(type_)
+        type_ = convert_tuple_to_union(type_)
 
         if type_ == Any:
             return True, {}
@@ -1041,19 +876,22 @@ class Check:
         >>> value = r.check_sequence("my sequence of strings?", [2.0], of=str)
         SequenceOfException: Error in param: name got value [2.0] is not of type str.
         """
-        
+
         # todo: would this (the mutable version) allow for List specific checks as well?
-        return cast(Sequence[T], self._check_generic_sequence(
-            name,
-            value,
-            of,
-            None,
-            custom_of_checker,
-            description,
-            Sequence,
-            SequenceException,
-            SequenceOfException
-        ))
+        return cast(
+            Sequence[T],
+            self._check_generic_sequence(
+                name,
+                value,
+                of,
+                None,
+                custom_of_checker,
+                description,
+                Sequence,
+                SequenceException,
+                SequenceOfException,
+            ),
+        )
 
     @overload
     def check_opt_sequence(
@@ -1248,17 +1086,20 @@ class Check:
         >>> value = r.check_mutable_sequence("my mut sequence of strings?", [2.0], of=str)
         MutableSequenceOfException: Error in param: name got value [2.0] is not of type str.
         """
-        return cast(MutableSequence[T], self._check_generic_sequence(
-            name,
-            value,
-            of,
-            default_element,
-            custom_of_checker,
-            description,
-            MutableSequence,
-            MutableSequenceException,
-            MutableSequenceOfException
-        ))
+        return cast(
+            MutableSequence[T],
+            self._check_generic_sequence(
+                name,
+                value,
+                of,
+                default_element,
+                custom_of_checker,
+                description,
+                MutableSequence,
+                MutableSequenceException,
+                MutableSequenceOfException,
+            ),
+        )
 
     def _check_generic_sequence(
         self,
@@ -1270,12 +1111,12 @@ class Check:
         description: str | None,
         type_: Type[Sequence[T]],
         exception: Type[BaseException],
-        exception_of: Type[BaseException]
+        exception_of: Type[BaseException],
     ) -> Any:
         if not isinstance(value, type_):
             return self._error(exception(name, value, description))
 
-        value = cast(type_[Any], value) # todo: ugh
+        value = cast(type_[Any], value)  # todo: ugh
 
         if of is Any:
             return value
@@ -1296,7 +1137,7 @@ class Check:
                 value[i] = default_element()
 
         return value
-        
+
     @overload
     def check_opt_mutable_sequence(
         self,
@@ -1333,9 +1174,7 @@ class Check:
         value: Any,
         *,
         of: Type[T] = Any,
-        default_mutable_sequence: Callable[
-            [], MutableSequence[T] | None
-        ] = lambda: [],
+        default_mutable_sequence: Callable[[], MutableSequence[T] | None] = lambda: [],
         default_element: Optional[Callable[[], T]] = None,
         custom_of_checker: Optional[Callable[[Any], bool]] = None,
         description: Optional[str] = None,
@@ -1401,7 +1240,7 @@ class Check:
         """
         if value is None:
             return default_mutable_sequence()
-        
+
         # todo: call _check_generic_sequence
         value = self.check_mutable_sequence(
             name,
@@ -1832,11 +1671,17 @@ class Check:
 
         # todo: catch errors here:
         if keys_of is not Any:
-            self.check_sequence(f"keys of {name}", list(cast(Sequence[KT], value.keys())), of=keys_of)
+            self.check_sequence(
+                f"keys of {name}", list(cast(Sequence[KT], value.keys())), of=keys_of
+            )
 
         # todo: catch errors here:
         if values_of is not Any:
-            self.check_sequence(f"values of {name}", list(cast(Sequence[VT], value.values())), of=values_of)
+            self.check_sequence(
+                f"values of {name}",
+                list(cast(Sequence[VT], value.values())),
+                of=values_of,
+            )
 
         # todo: if any errors: raise MappingException() from ...
 
@@ -2145,6 +1990,8 @@ class Check:
         >>>     val_b = r.check_int("my int", 2)
         Two exceptions
         """
+        from rcheck.check_all import CheckAll
+
         self._enable_suppress_and_record()
         return CheckAll(check_instance=self)
 
@@ -2162,4 +2009,3 @@ class Check:
 #     c = r.check_sequence("my sq", 1)
 
 # print(a, b)
-

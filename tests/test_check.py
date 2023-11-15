@@ -24,7 +24,7 @@ def r_check():
 def test_generic_isinstance_primitive_success(
     primitive_value: Any, primitive_type: Type[Any], r_check: Check
 ):
-    assert r_check._generic_isinstance(primitive_value, primitive_type)[0]
+    assert r_check._generic_isinstance(primitive_value, primitive_type)[0] # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -40,7 +40,7 @@ def test_generic_isinstance_primitive_success(
 def test_generic_isinstance_primitive_failures(
     primitive_value: Any, primitive_type: Type[Any], r_check: Check
 ):
-    assert not r_check._generic_isinstance(primitive_value, primitive_type)[0]
+    assert not r_check._generic_isinstance(primitive_value, primitive_type)[0] # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -53,7 +53,7 @@ def test_generic_isinstance_primitive_failures(
     ],
 )
 def test_generic_isinstance_optional_none_success(type_: Type[Any], r_check: Check):
-    assert r_check._generic_isinstance(None, type_)[0]
+    assert r_check._generic_isinstance(None, type_)[0] # type: ignore
 
 
 @pytest.mark.parametrize(
@@ -72,4 +72,4 @@ def test_generic_isinstance_optional_none_success(type_: Type[Any], r_check: Che
 def test_generic_isinstance_optional_value_success(
     value: Any, type_: Type[Any], r_check: Check
 ):
-    assert r_check._generic_isinstance(value, type_)[0]
+    assert r_check._generic_isinstance(value, type_)[0] # type: ignore
