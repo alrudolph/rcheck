@@ -1,0 +1,284 @@
+<html>
+
+<head>
+    <title>rcheck documentation</title>
+
+    <!-- Tailwind -->
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Highlightjs -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        .hljs {
+            background: #00000000 !important;
+        }
+
+        pre code.hljs {
+            padding: 0 !important;
+        }
+
+        pre code.code-wrap {
+            white-space: pre-wrap;
+        }
+
+        .cm-content {}
+    </style>
+
+    <!-- Pyscript -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+
+<body class="flex flex-col items-center">
+    <py-config>
+        name = "Freedom Units"
+        description = "A testing app"
+        version = "0.0.1"
+        terminal = false
+
+        packages = [
+        "rcheck",
+        ]
+    </py-config>
+    <main class="max-w-6xl w-full">
+        <!-- sidebar -->
+        <div class="flex w-full">
+            <div>
+                <aside class="sticky top-0 h-min">
+                    <a href="https://www.github.com/alrudolph/ipydocs">
+                        <h1 class="text-3xl">rcheck</h1>
+                    </a>
+                    <ol>
+
+                        <li>
+                            <h3 class="text-xl font-bold">General</h3>
+                            <ol>
+
+                                <li>
+                                    <a href="/">About</a>
+                                </li>
+
+                            </ol>
+                        </li>
+
+                        <li>
+                            <h3 class="text-xl font-bold">Classes</h3>
+                            <ol>
+
+                                <li>
+                                    <a href="/check.html">
+                                        <h4>Check</h4>
+                                    </a>
+                                    <ul>
+                                        <li class="pl-2 italic"><a href="/check.html#check_bool">check_bool</a></li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_bytes">check_bytes</a></li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_float">check_float</a></li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_int">check_int</a></li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_mapping">check_mapping</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_mutable_mapping">check_mutable_mapping</a></li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_mutable_sequence">check_mutable_sequence</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_mutable_set">check_mutable_set</a></li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_opt_bool">check_opt_bool</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_opt_bytes">check_opt_bytes</a></li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_opt_float">check_opt_float</a></li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_opt_int">check_opt_int</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_opt_mapping">check_opt_mapping</a></li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_opt_mutable_mapping">check_opt_mutable_mapping</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_opt_mutable_sequence">check_opt_mutable_sequence</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_opt_mutable_set">check_opt_mutable_set</a></li>
+                                        <li class="pl-2 italic"><a
+                                                href="/check.html#check_opt_sequence">check_opt_sequence</a></li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_opt_set">check_opt_set</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_opt_str">check_opt_str</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_sequence">check_sequence</a>
+                                        </li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_set">check_set</a></li>
+                                        <li class="pl-2 italic"><a href="/check.html#check_str">check_str</a></li>
+                                    </ul>
+                                </li>
+
+                            </ol>
+                        </li>
+
+                        <li>
+                            <h3 class="text-xl font-bold">Functions</h3>
+                            <ol>
+
+                                <li>
+                                    <a href="/check_all.html">check_all</a>
+                                </li>
+
+                            </ol>
+                        </li>
+
+                    </ol>
+                </aside>
+            </div>
+
+            <!-- main content -->
+            <div class="w-full py-2 px-8">
+                <h1 class="text-4xl bold">rcheck</h1>
+
+                <a href="https://github.com/alrudolph/rcheck" class="flex">
+                    <img class="h-6"
+                        src="https://static-00.iconduck.com/assets.00/github-icon-2048x1999-d37ckpm6.png" />
+                    <p class="pl-2">Github</p>
+                </a>
+
+                <h2 class="text-2xl pt-6">Summary</h2>
+
+                <p class="py-4">Rcheck is a library for runtime type checking, with a few goals:</p>
+                <ol>
+                    <li class="pl-2">1. Consistent and helpful error messages</li>
+                    <li class="pl-2">2. Default object values</li>
+                    <li class="pl-2">3. Generic type checking</li>
+                </ol>
+
+                <h2 class="text-2xl pt-6">Examples</h2>
+
+                <p class="pt-8 pb-4">Check the type of each input and raise an exception if incorrect.</p>
+
+                <pre class="w-full flex bg-gray-100 px-4">
+    <code class="language-py table w-full whitespace-pre-wrap">
+>>> from rcheck import r
+>>>
+>>> def sign_up(name: str, age: int):
+>>>     name = r.check_str("user's name", name)
+>>>     age = r.check_int("user's age", age)
+>>>     print(name, age)
+>>>
+>>> sign_up("rcheck", 10)
+    </code>
+</pre>
+
+                <p class="pt-8 pb-4">
+                    Check the type of each input and raise an exception for each incorrect case.
+                    If both the name and age are of the incorrect types, then the previous example
+                    will only raise an exception for the name, however this example shows that
+                    both exceptions will be raised in an exception group.
+                </p>
+
+                <pre class="w-full flex bg-gray-100 px-4">
+    <code class="language-py table w-full whitespace-pre-wrap">
+>>> from rcheck import r
+>>>
+>>> def sign_up(name: str, age: int):
+>>>     with r.check_all:
+>>>         name = r.check_str("user's name", name)
+>>>         age = r.check_int("user's age", age)
+>>>     print(name, age)
+>>>
+>>> sign_up("rcheck", 10)
+    </code>
+</pre>
+
+                <p class="pt-8 pb-4">
+                    Generic type checking
+                </p>
+
+                <pre class="w-full flex bg-gray-100 px-4">
+    <code class="language-py table w-full whitespace-pre-wrap">
+>>> from typing import Union, Sequence
+>>> from rcheck import r
+>>>
+>>> my_list = [1, "two", [3.0, None]]
+>>> my_list = r.check_sequence(
+...     "complicated generic list",
+...     my_list,
+...     of=Union[int, str, Sequence[Optional[float]]],
+... )
+>>> my_list
+    </code>
+</pre>
+
+                <p class="pt-8 pb-4">
+                    Since there are issues setting default parameters in functions to be classes such as lists or dicts,
+                    rheck will return the correct default.
+                </p>
+
+                <pre class="w-full flex bg-gray-100 px-4">
+    <code class="language-py table w-full whitespace-pre-wrap">
+>>> from typing import Any, Optional, Sequence
+>>> from rcheck import r
+>>>
+>>> def my_func(
+...     values: Optional[Sequence[Any]] = None
+... ) -> Sequence[Any]:
+>>>     values: Sequence[Any] = r.check_opt_sequence(
+...         "optional values", 
+...         values,
+...     )
+>>>     return values
+>>>
+>>> my_func()
+[]
+    </code>
+</pre>
+
+                <h2 class="text-2xl pt-6">Inspiration</h2>
+
+                <p class="py-4">
+                    The main inspiration from this project came from Dagster's internal <span
+                        class="bg-gray-100 p-2 rounded-2xl">check</span>
+                    module.
+                </p>
+
+                <p>See:</p>
+                <ul>
+                    <li>
+                        <a class="pl-2"
+                            href="https://github.com/dagster-io/dagster/blob/498e3f1da1fa3ed6c548bff26e74c6c3e05fd140/python_modules/dagster/dagster/_check/__init__.py">
+                            1. Dagster's
+                            internal check module</a>
+                    </li>
+                    <li>
+                        <a class="pl-2"
+                            href="https://github.com/pydantic/pydantic/blob/6ed90daab74767ce94ee4d2413f02f42b73a53f6/pydantic/v1/validators.py">
+                            2. Pydantic
+                            validators</a>
+                    </li>
+                </ul>
+                <a class="py-8 text-gray-500 flex justify-end" href="https://www.github.com/alrudolph/ipydocs">
+                    Created with ipydocs
+                </a>
+            </div>
+        </div>
+    </main>
+    <script defer>
+        // const sheet = new CSSStyleSheet;
+        // sheet.replaceSync( `.cm-content { white-space: pre-wrap }`);
+        // host.shadowRoot.adoptedStyleSheets.push(sheet);
+        setTimeout(() => {
+            const repls = document.querySelectorAll("py-repl div div div");
+
+            const sheet = new CSSStyleSheet();
+            sheet.replaceSync(`.cm-content { white-space: pre-wrap }`);
+
+            repls.forEach((repl, i) => {
+                repls[i].shadowRoot.querySelector('div[role=textbox]').style = "white-space: pre-wrap !important;";
+                repls[i].shadowRoot.querySelector('div[role=textbox] .cm-line').style = "width: 100%; overflow-x: hidden;";
+            });
+        }, 5000);
+    </script>
+</body>
+
+</html>

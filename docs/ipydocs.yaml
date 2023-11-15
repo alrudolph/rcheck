@@ -1,0 +1,5 @@
+title: rcheck
+project_location: rcheck
+layout:
+  home:
+    path: ./home.html
