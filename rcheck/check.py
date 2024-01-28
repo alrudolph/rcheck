@@ -1116,8 +1116,6 @@ class Check:
         if not isinstance(value, type_):
             return self._error(exception(name, value, description))
 
-        value = cast(type_[Any], value)  # todo: ugh
-
         if of is Any:
             return value
 
@@ -1144,7 +1142,7 @@ class Check:
         name: str,
         value: Any,
         *,
-        of: Type[T] = Any,
+        of: Type[T] = ...,
         default_mutable_sequence: Callable[[], MutableSequence[T]] = lambda: [],
         default_element: Optional[Callable[[], T]] = None,
         custom_of_checker: Optional[Callable[[Any], bool]] = None,
@@ -1158,7 +1156,7 @@ class Check:
         name: str,
         value: Any,
         *,
-        of: Type[T] = Any,
+        of: Type[T] = ...,
         default_mutable_sequence: Callable[
             [], MutableSequence[T] | None
         ] = lambda: None,
@@ -1338,7 +1336,7 @@ class Check:
         name: str,
         value: Any,
         *,
-        of: Type[T] = Any,
+        of: Type[T] = ...,
         default_set: Callable[[], Set[T]] = lambda: set(),
         custom_of_checker: Optional[Callable[[Any], bool]] = None,
         description: Optional[str] = None,
@@ -1351,7 +1349,7 @@ class Check:
         name: str,
         value: Any,
         *,
-        of: Type[T] = Any,
+        of: Type[T] = ...,
         default_set: Callable[[], Set[T] | None] = lambda: None,
         custom_of_checker: Optional[Callable[[Any], bool]] = None,
         description: Optional[str] = None,
@@ -1511,7 +1509,7 @@ class Check:
         name: str,
         value: Any,
         *,
-        of: Type[T] = Any,
+        of: Type[T] = ...,
         default_mutable_set: Callable[[], MutableSet[T]] = lambda: set(),
         custom_of_checker: Optional[Callable[[Any], bool]] = None,
         description: Optional[str] = None,
@@ -1524,7 +1522,7 @@ class Check:
         name: str,
         value: Any,
         *,
-        of: Type[T] = Any,
+        of: Type[T] = ...,
         default_mutable_set: Callable[[], MutableSet[T] | None] = lambda: None,
         custom_of_checker: Optional[Callable[[Any], bool]] = None,
         description: Optional[str] = None,
@@ -1694,8 +1692,8 @@ class Check:
         value: Any,
         *,
         default_mapping: Callable[[], Mapping[KT, VT]] = lambda: {},
-        keys_of: Type[KT] = Any,
-        values_of: Type[VT] = Any,
+        keys_of: Type[KT] = ...,
+        values_of: Type[VT] = ...,
         description: Optional[str] = None,
     ) -> Mapping[KT, VT]:
         ...
@@ -1707,8 +1705,8 @@ class Check:
         value: Any,
         *,
         default_mapping: Callable[[], Mapping[KT, VT] | None] = lambda: None,
-        keys_of: Type[KT] = Any,
-        values_of: Type[VT] = Any,
+        keys_of: Type[KT] = ...,
+        values_of: Type[VT] = ...,
         description: Optional[str] = None,
     ) -> Mapping[KT, VT] | None:
         ...
@@ -1867,8 +1865,8 @@ class Check:
         name: str,
         value: Any,
         *,
-        keys_of: Type[KT] = Any,
-        values_of: Type[VT] = Any,
+        keys_of: Type[KT] = ...,
+        values_of: Type[VT] = ...,
         default_mutable_mapping: Callable[[], MutableMapping[KT, VT]] = lambda: {},
         description: Optional[str] = None,
     ) -> MutableMapping[KT, VT]:
@@ -1880,8 +1878,8 @@ class Check:
         name: str,
         value: Any,
         *,
-        keys_of: Type[KT] = Any,
-        values_of: Type[VT] = Any,
+        keys_of: Type[KT] = ...,
+        values_of: Type[VT] = ...,
         default_mutable_mapping: Callable[
             [],
             MutableMapping[KT, VT] | None,
