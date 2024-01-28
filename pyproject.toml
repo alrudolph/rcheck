@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rcheck"
-version = "0.0.9"
+version = "0.0.10"
 description = "Runtime type checking"
 authors = ["Alex Rudolph <alex3rudolph@gmail.com>"]
 license = "Apache-2.0"
